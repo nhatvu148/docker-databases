@@ -47,6 +47,20 @@ services:
           ME_CONFIG_MONGODB_ADMINPASSWORD: 123456789
           ME_CONFIG_MONGODB_SERVER: mongodb
 
+    envoy:
+        container_name: envoy
+        build:
+          context: .
+          dockerfile: Dockerfile
+        volumes:
+          - ./envoy.yaml:/etc/envoy.yaml
+        expose:
+          - "80"
+          - "9901"
+        ports:
+          - "8000:80"
+          - "9901:9901"
+
 networks:
   pg_network:
     driver: bridge
