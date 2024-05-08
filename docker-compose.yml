@@ -61,10 +61,46 @@ services:
           - "8000:80"
           - "9901:9901"
 
+    rabbitmq:
+      image: rabbitmq:3-management-alpine
+      container_name: 'rabbitmq'
+      ports:
+          - 5672:5672
+          - 15672:15672
+      volumes:
+          - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+          - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      networks:
+          - rabbitmq_net
+    
+    redis:
+      container_name: redis
+      restart: always
+      image: redis:7.2.4
+      ports:
+          - 6479:6379
+      command:
+        - --loglevel warning
+      volumes:
+        - redis-data:/var/lib/redis:Z
+    
+    worker:
+      container_name: celery_worker
+      build:
+        context: celery
+      command: celery -A tasks worker --loglevel=info
+      depends_on:
+        - rabbitmq
+      networks:
+          - rabbitmq_net
+
 networks:
   pg_network:
+    driver: bridge
+  rabbitmq_net:
     driver: bridge
 
 volumes:
   postgresql-data:
   mongodb_data:
+  redis-data:
