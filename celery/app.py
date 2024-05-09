@@ -1,6 +1,19 @@
 from tasks import add, reverse
+from celery.result import AsyncResult
+from time import sleep
 
-add.delay(123, 456)
-result = reverse.delay('Hello World')
-# print(result.status)
-# print(result.get())
+def print_result(task_id, task_name):
+    print(task_name + ' Task ID: ' + task_id)
+    result = AsyncResult(task_id)
+    while result.status == 'PENDING':
+        print(result.status)
+        sleep(1)
+    print(result.status)
+    print(result.result)
+
+res_add = add.delay(123, 456)
+add_task_id= res_add.task_id
+print_result(res_add.task_id, 'add')
+
+res_reverse = reverse.delay('Hello World')
+print_result(res_reverse.task_id, 'reverse')
